@@ -186,7 +186,6 @@ INSTRUCTIONS:
 2. DESCRIPTION (≤140 words total):
    - First paragraph: Hook + brief value proposition (2-3 sentences)
    - Second paragraph: Key benefits/insights + call to action (2-3 sentences)
-   - End with exactly 3 relevant hashtags
    - Use conversational, engaging language
    - Include specific benefits or outcomes
    - Make it scannable with clear value

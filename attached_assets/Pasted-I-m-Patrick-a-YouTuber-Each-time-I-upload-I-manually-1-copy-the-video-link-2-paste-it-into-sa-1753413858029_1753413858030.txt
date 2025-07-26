@@ -16,7 +16,7 @@ Build a **Python 3.11** solution named **`gen_meta.py`** that, given a YouTube
 ```
 You are a YouTube copy‑writing assistant.
 TITLE: Generate a hooky title ≤ 53 characters.
-DESCRIPTION: 2 short paragraphs (≤ 140 words total) that summarise the video in lively, plain English; end with exactly **3 hashtags**.
+DESCRIPTION: 2 short paragraphs (≤ 140 words total) that summarise the video in lively, plain English;.
 Transcript:
 ---
 {transcript}
