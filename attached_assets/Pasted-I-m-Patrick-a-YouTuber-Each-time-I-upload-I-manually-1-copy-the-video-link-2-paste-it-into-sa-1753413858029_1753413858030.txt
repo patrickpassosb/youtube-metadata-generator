@@ -1,0 +1,68 @@
+I’m Patrick, a YouTuber. Each time I upload I manually
+
+1. copy the video link → 2. paste it into savesubs.com → 3. download the auto‑generated subtitle (.srt) → 4. paste the transcript into Groq (llama‑3‑70b‑versatile) → 5. ask for a catchy title & SEO description → 6. copy the result back to YouTube.
+    
+    This takes ≈ 5 min per video.
+    
+
+**Goal**
+
+Build a **Python 3.11** solution named **`gen_meta.py`** that, given a YouTube URL, will
+
+1. Grab **English auto‑captions** (use `yt‑dlp`, no browser automation).
+2. Send the transcript to **Groq** (model `llama‑3-70b-versatile`) via API key set as environment variable
+3. Apply this prompt *(fill `{transcript}`)* :
+
+```
+You are a YouTube copy‑writing assistant.
+TITLE: Generate a hooky title ≤ 53 characters.
+DESCRIPTION: 2 short paragraphs (≤ 140 words total) that summarise the video in lively, plain English; end with exactly **3 hashtags**.
+Transcript:
+---
+{transcript}
+
+```
+
+1. Save output to `<video_id>.md` :
+
+```
+# <Generated Title>
+
+<Generated Description>
+
+```
+
+1. Print “✅ Saved to ”.
+
+**Extra requirement – Mobile use**
+
+- Provide a **lightweight HTTP endpoint** (FastAPI or Flask) called `/meta` that accepts `POST {"url": "<YouTube‑URL>"}` and returns JSON:
+    
+    ```json
+    { "title": "...", "description": "...", "file_path": "..." }
+    
+    ```
+    
+    This lets me call it from the **Pythonista / Termux / Shortcuts app** on my phone.
+    
+- Include a simple **curl example** in the README so I can test from mobile.
+
+**Constraints**
+
+- < 20 Groq calls / day – handle 429s with back‑off.
+- Exit cleanly if captions missing.
+- Cross‑platform (Win 11, macOS, Linux, Termux).
+- Log progress with `rich` if available, else `print`.
+
+**Deliverables**
+
+1. `gen_meta.py` (CLI entry point)
+2. `server.py` (FastAPI / Flask wrapper)
+3. One‑paragraph architecture explanation.
+4. Mini unit‑test or demo command.
+
+**Answer these**
+
+1. `pip install` requirements + why.
+2. How to batch‑process a CSV of URLs later.
+3. Recommended way to host the API so it’s reachable from my phone over LAN.
