@@ -7,11 +7,6 @@ Provides a user-friendly interface for extracting captions and generating SEO me
 import os
 import sys
 import time
-import json
-import qrcode
-import base64
-import socket
-from io import BytesIO
 from typing import Optional, Dict, Any
 
 # Add current directory to path for imports
@@ -108,15 +103,7 @@ st.markdown("""
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    /* QR code styling */
-    .qr-container {
-        text-align: center;
-        padding: 1rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -141,12 +128,11 @@ def display_instructions():
         
         1. **Paste YouTube URL** - Any YouTube video with English auto-captions
         2. **Click Generate** - AI will extract captions and create metadata
-        3. **Download Results** - Get your SEO-optimized title and description
+        3. **View Results** - See your SEO-optimized title and description
         
         **Features:**
         - ✅ Catchy titles (≤53 characters for SEO)
-        - ✅ Engaging descriptions (≤140 words + 3 hashtags)
-        - ✅ Auto-saves to markdown files
+        - ✅ Engaging descriptions (≤140 words)
         - ✅ Works with any YouTube video that has English auto-captions
         
         **Requirements:**
@@ -229,12 +215,6 @@ def display_processing_section(url: str, generator: YouTubeMetaGenerator):
                            unsafe_allow_html=True)
                 return
             
-            # Step 4: Save file
-            status_text.text("💾 Saving results...")
-            progress_bar.progress(90)
-            
-            filename = generator.save_metadata(video_id, metadata)
-            
             progress_bar.progress(100)
             status_text.text("✅ Complete!")
             
@@ -245,9 +225,9 @@ def display_processing_section(url: str, generator: YouTubeMetaGenerator):
             status_text.empty()
             
             # Display results
-            display_results(metadata, filename, video_id)
+            display_results(metadata, video_id)
 
-def display_results(metadata: Dict[str, str], filename: str, video_id: str):
+def display_results(metadata: Dict[str, str], video_id: str):
     """Display the generated metadata results."""
     
     st.markdown('<div class="success-box">🎉 Metadata generated successfully!</div>', 
@@ -267,120 +247,10 @@ def display_results(metadata: Dict[str, str], filename: str, video_id: str):
     word_count = len(metadata['description'].split())
     st.caption(f"Words: {word_count}/140")
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # File download section
-    st.markdown("### 💾 Download Results")
-    
-    # Create markdown content for download
-    markdown_content = f"""# {metadata['title']}
 
-{metadata['description']}
-
-"""
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.download_button(
-            label="📥 Download Markdown File",
-            data=markdown_content,
-            file_name=f"{video_id}.md",
-            mime="text/markdown",
-            help="Download as markdown file"
-        )
-    
-    with col2:
-        # JSON format for API compatibility
-        json_data = {
-            "title": metadata['title'],
-            "description": metadata['description'],
-            "file_path": filename,
-            "video_id": video_id
-        }
-        
-        st.download_button(
-            label="📥 Download JSON Data",
-            data=json.dumps(json_data, indent=2),
-            file_name=f"{video_id}_metadata.json",
-            mime="application/json",
-            help="Download as JSON for API integration"
-        )
-    
-    # Additional info
-    st.markdown('<div class="info-box">', unsafe_allow_html=True)
-    st.markdown(f"""
-    **File Information:**
-    - Saved as: `{filename}`
-    - Video ID: `{video_id}`
-    - Generated at: {time.strftime('%Y-%m-%d %H:%M:%S')}
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-def display_api_info():
-    """Display API information in sidebar."""
+def display_sidebar_info():
+    """Display sidebar information."""
     with st.sidebar:
-        st.markdown("### 📱 Mobile Access")
-        
-        # Get local IP address for mobile access
-        try:
-            # Get the actual network IP address, not localhost
-            import subprocess
-            result = subprocess.run(['hostname', '-I'], capture_output=True, text=True)
-            if result.returncode == 0:
-                local_ip = result.stdout.strip().split()[0]  # Get first IP address
-            else:
-                # Fallback method
-                hostname = socket.gethostname()
-                local_ip = socket.gethostbyname(hostname)
-            
-            mobile_url = f"http://{local_ip}:5000"
-            
-            # Generate QR code
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(mobile_url)
-            qr.make(fit=True)
-            qr_img = qr.make_image(fill_color="black", back_color="white")
-            
-            # Convert to base64 for display
-            buffered = BytesIO()
-            qr_img.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            
-            st.markdown(f"""
-            **Scan QR code to access on your phone:**
-            
-            <div class="qr-container">
-                <img src="data:image/png;base64,{img_str}" width="200" height="200">
-                <br><small>{mobile_url}</small>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        except Exception as e:
-            st.error(f"Could not generate QR code: {e}")
-        
-        st.markdown("### 🔧 API Access")
-        st.markdown("""
-        **For mobile/programmatic access:**
-        
-        The same functionality is available via REST API at `/meta` endpoint.
-        
-        **Example curl command:**
-        ```bash
-        curl -X POST "http://localhost:8000/meta" \\
-             -H "Content-Type: application/json" \\
-             -d '{"url": "https://youtube.com/watch?v=..."}'
-        ```
-        
-        **Response format:**
-        ```json
-        {
-          "title": "Generated title",
-          "description": "Generated description",
-          "file_path": "video_id.md"
-        }
-        ```
-        """)
-        
         st.markdown("### 📊 Usage Stats")
         if 'processed_count' not in st.session_state:
             st.session_state.processed_count = 0
@@ -421,7 +291,7 @@ def main():
         display_processing_section(url, generator)
     
     # Sidebar info
-    display_api_info()
+    display_sidebar_info()
     
     # Footer
     display_footer()

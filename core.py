@@ -182,13 +182,17 @@ INSTRUCTIONS:
    - Use action words and create curiosity
    - Avoid clickbait but make it irresistible
    - Examples: "5 Secrets That Changed Everything", "Why Nobody Talks About This", "The Truth About..."
+   - Never use "!" in the title
+   - Do not every title needs to talk about "Learning" and "Journey"
+   - Do not sound so extraordinary, just be natural and engaging
+
 
 2. DESCRIPTION (≤140 words total):
    - First paragraph: Hook + brief value proposition (2-3 sentences)
    - Second paragraph: Key benefits/insights + call to action (2-3 sentences)
    - Use conversational, engaging language
-   - Include specific benefits or outcomes
-   - Make it scannable with clear value
+   - Make it a description of the vide, what the video says the purpose of the video in a description to who is watching know about what the video is
+   - Do not sound so extraordinary, just be natural and engaging
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 TITLE: [Your catchy title here]
