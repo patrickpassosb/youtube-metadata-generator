@@ -6,19 +6,11 @@ Shared between CLI and API interfaces.
 import os
 import re
 import time
-import json
 import logging
 from typing import Optional, Dict, Any
 from urllib.parse import urlparse, parse_qs
 
-try:
-    from rich.console import Console
-    from rich.progress import Progress, SpinnerColumn, TextColumn
-    RICH_AVAILABLE = True
-    console = Console()
-except ImportError:
-    RICH_AVAILABLE = False
-    console = None
+
 
 import yt_dlp
 from groq import Groq
@@ -36,18 +28,8 @@ class YouTubeMetaGenerator:
         self.groq_client = Groq(api_key=self.groq_api_key)
         
     def log(self, message: str, style: str = "info"):
-        """Log message with optional rich formatting."""
-        if RICH_AVAILABLE and console:
-            if style == "error":
-                console.print(f"❌ {message}", style="red")
-            elif style == "success":  
-                console.print(f"✅ {message}", style="green")
-            elif style == "warning":
-                console.print(f"⚠️ {message}", style="yellow")
-            else:
-                console.print(f"ℹ️ {message}", style="blue")
-        else:
-            print(f"[{style.upper()}] {message}")
+        """Log message with simple formatting."""
+        print(f"[{style.upper()}] {message}")
     
     def extract_video_id(self, url: str) -> Optional[str]:
         """Extract YouTube video ID from URL."""
@@ -175,24 +157,66 @@ class YouTubeMetaGenerator:
 VIDEO TRANSCRIPT:
 {transcript}
 
-INSTRUCTIONS:
-1. TITLE (≤53 characters):
-   - Start with a powerful hook (number, question, or emotional trigger)
-   - Include the main topic/keyword naturally
-   - Use action words and create curiosity
-   - Avoid clickbait but make it irresistible
-   - Examples: "5 Secrets That Changed Everything", "Why Nobody Talks About This", "The Truth About..."
-   - Never use "!" in the title
-   - Do not every title needs to talk about "Learning" and "Journey"
-   - Do not sound so extraordinary, just be natural and engaging
+INSTRUCTIONS
 
+### **OBJECTIVE**
 
-2. DESCRIPTION (≤140 words total):
-   - First paragraph: Hook + brief value proposition (2-3 sentences)
-   - Second paragraph: Key benefits/insights + call to action (2-3 sentences)
-   - Use conversational, engaging language
-   - Make it a description of the vide, what the video says the purpose of the video in a description to who is watching know about what the video is
-   - Do not sound so extraordinary, just be natural and engaging
+Generate **YouTube video titles** and **descriptions** for **Patrick Passos**, a bilingual Brazilian creator documenting his personal journey learning English, Generative AI, Prompt Engineering, and Python. The content is part of his mission to learn, grow a personal brand, and eventually earn income through his skills.
+
+---
+
+### **BACKGROUND CONTEXT (FOR INTERNAL USE ONLY — NOT TO BE INCLUDED IN OUTPUT)**
+
+- Patrick Passos is a young content creator from São Paulo, Brazil.
+- He began his YouTube journey on **Jan 25, 2025**, primarily to **learn English** and has been posting **almost daily** since.
+- He's immersing himself in English: media, devices, conversations — everything.
+- He is now learning **Generative AI**, **Prompt Engineering**, and **Python** to build useful AI agents and automate tasks.
+- His goals:
+    1. Learn English
+    2. Build a personal brand
+    3. Document his journey
+
+**⚠️ IMPORTANT:** Titles and descriptions **must not include personal details**. This background is to help generate better, more authentic content.
+
+### 2. TITLE (≤53 characters):
+
+- Start with a **hook** (number, question, insight, etc.)
+- Include the **main topic or keyword** naturally
+- Use **action verbs** and **create curiosity**
+- Sound **natural, not exaggerated**
+- Do not talk about "grow","learning" and "journey" everytime
+- Avoid **clickbait** and **exclamation marks (!)**
+
+**✅ Good examples:**
+
+- `How I Learned AI Without a Degree`
+- `3 Tools I Use to Learn Python Fast`
+- `Why English Changed My Life`
+- `What I Wish I Knew Before Starting AI`
+
+3. DESCRIPTION (≤140 words total):
+
+**Paragraph 1 (Hook + Purpose):**
+
+Start with a short, engaging hook. Briefly describe the **purpose of the video** and why it's relevant to viewers.
+
+**Paragraph 2 (Value + CTA):**
+
+Mention **what viewers will learn or gain**. Add a simple **call to action** like subscribing, watching until the end, or leaving a comment.
+
+**Tone:**
+
+- Friendly, casual, and conversational
+- Honest and relatable
+- Avoid hype and exaggeration
+- **Never use exclamation marks**
+- Do not talk about "grow","learning" and "journey" everytime
+
+**✅ Example:**
+
+In this video, I share how I started learning Python to build simple AI agents from scratch — no experience needed. If you're also new to coding, this is for you.
+
+You'll see how I'm using free tools, practicing daily, and staying consistent. Subscribe to follow along.
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 TITLE: [Your catchy title here]
@@ -337,26 +361,7 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
             self.log(f"Error parsing Groq response: {e}", "error")
             return None
     
-    def save_metadata(self, video_id: str, metadata: Dict[str, str]) -> str:
-        """Save metadata to markdown file."""
-        try:
-            filename = f"{video_id}.md"
-            
-            content = f"""# {metadata['title']}
 
-{metadata['description']}
-
-"""
-            
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(content)
-            
-            self.log(f"Saved to {filename}", "success")
-            return filename
-            
-        except Exception as e:
-            self.log(f"Error saving metadata: {e}", "error")
-            return ""
     
     def process_video(self, url: str) -> Optional[Dict[str, Any]]:
         """Main processing function for a single video."""
@@ -384,14 +389,10 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
             if not metadata:
                 return None
             
-            # Save to file
-            filename = self.save_metadata(video_id, metadata)
-            
             return {
                 "video_id": video_id,
                 "title": metadata["title"],
-                "description": metadata["description"],
-                "file_path": filename
+                "description": metadata["description"]
             }
             
         except Exception as e:
@@ -399,34 +400,4 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
             return None
 
 
-def process_csv_batch(csv_file: str, groq_api_key: Optional[str] = None) -> None:
-    """Process a batch of URLs from CSV file."""
-    import csv
-    
-    generator = YouTubeMetaGenerator(groq_api_key)
-    
-    try:
-        with open(csv_file, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            
-            # Expect CSV with 'url' column
-            for row in reader:
-                url = row.get('url', '').strip()
-                if not url:
-                    continue
-                
-                generator.log(f"Processing: {url}")
-                result = generator.process_video(url)
-                
-                if result:
-                    generator.log(f"✅ Generated: {result['title']}")
-                else:
-                    generator.log(f"❌ Failed to process: {url}")
-                
-                # Brief pause between requests to be respectful
-                time.sleep(2)
-                
-    except FileNotFoundError:
-        generator.log(f"CSV file not found: {csv_file}", "error")
-    except Exception as e:
-        generator.log(f"Error processing CSV: {e}", "error")
+
