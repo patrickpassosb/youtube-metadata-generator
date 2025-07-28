@@ -1,9 +1,0 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "youtube-metadata-generator"
-version = "1.0.0"
-description = "YouTube Metadata Generator"
-requires-python = ">=3.11" 
