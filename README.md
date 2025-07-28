@@ -15,16 +15,16 @@ A simple web app to extract YouTube captions and generate SEO-optimized titles a
 ## Quick Start
 
 1. **Install dependencies:**
-   ```bash
+```bash
    pip install -r requirements.txt
    ```
 2. **Get a Groq API key:** [console.groq.com](https://console.groq.com)
 3. **Set your API key as an environment variable:**
-   ```bash
-   export GROQ_API_KEY="your_api_key_here"
-   ```
+```bash
+export GROQ_API_KEY="your_api_key_here"
+```
 4. **Run the app:**
-   ```bash
+```bash
    streamlit run app.py
    ```
 5. Open [http://localhost:8501](http://localhost:8501) in your browser.
