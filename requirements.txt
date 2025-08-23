@@ -1,4 +1,4 @@
-groq>=0.30.0
+openai>=1.40.0
 requests>=2.32.4
 streamlit>=1.47.0
 yt-dlp>=2025.7.21 

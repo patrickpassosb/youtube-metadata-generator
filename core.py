@@ -13,7 +13,7 @@ from urllib.parse import urlparse, parse_qs
 
 
 import yt_dlp
-from groq import Groq
+from openai import OpenAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 class YouTubeMetaGenerator:
     """Main class for extracting captions and generating metadata."""
     
-    def __init__(self, groq_api_key: Optional[str] = None):
-        """Initialize with Groq API key."""
-        self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY", "")
-        self.groq_client = Groq(api_key=self.groq_api_key)
+    def __init__(self, openai_api_key: Optional[str] = None):
+        """Initialize with OpenAI API key."""
+        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY", "")
+        self.openai_client = OpenAI(api_key=self.openai_api_key)
         
     def log(self, message: str, style: str = "info"):
         """Log message with simple formatting."""
@@ -150,7 +150,7 @@ class YouTubeMetaGenerator:
             return ""
     
     def generate_metadata_with_backoff(self, transcript: str, max_retries: int = 3) -> Optional[Dict[str, str]]:
-        """Generate metadata using Groq with exponential backoff for rate limiting."""
+        """Generate metadata using OpenAI with exponential backoff for rate limiting."""
         
         prompt = f"""You are an expert YouTube SEO copywriter. Create compelling metadata that maximizes click-through rates and engagement.
 
@@ -204,6 +204,8 @@ Start with a short, engaging hook. Briefly describe the **purpose of the video**
 
 Mention **what viewers will learn or gain**. Add a simple **call to action** like subscribing, watching until the end, or leaving a comment.
 
+Never use exclamation marks.
+
 **Tone:**
 
 - Friendly, casual, and conversational
@@ -228,30 +230,27 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
             try:
                 self.log(f"Generating metadata (attempt {attempt + 1}/{max_retries})...")
                 
-                response = self.groq_client.chat.completions.create(
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
                     messages=[
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
+                        {"role": "user", "content": prompt}
                     ],
-                    model="llama-3.3-70b-versatile",
-                    temperature=0.7,  # Add some creativity
-                    max_tokens=300,   # Limit response length
+                    temperature=0.7,
+                    max_tokens=300,
                 )
-                
+
                 content = response.choices[0].message.content
                 
                 # Parse the response
                 if content:
-                    metadata = self.parse_groq_response(content)
+                    metadata = self.parse_openai_response(content)
                 else:
                     metadata = None
                 if metadata:
                     self.log("Metadata generated successfully", "success")
                     return metadata
                 else:
-                    self.log("Failed to parse Groq response", "warning")
+                    self.log("Failed to parse OpenAI response", "warning")
                     
             except Exception as e:
                 error_msg = str(e)
@@ -275,8 +274,8 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
         
         return None
     
-    def parse_groq_response(self, content: str) -> Optional[Dict[str, str]]:
-        """Parse Groq response to extract title and description."""
+    def parse_openai_response(self, content: str) -> Optional[Dict[str, str]]:
+        """Parse OpenAI response to extract title and description."""
         try:
             lines = content.strip().split('\n')
             title = ""
@@ -358,7 +357,7 @@ Remember: Quality over quantity. Make every word count for maximum impact."""
             return None
             
         except Exception as e:
-            self.log(f"Error parsing Groq response: {e}", "error")
+            self.log(f"Error parsing OpenAI response: {e}", "error")
             return None
     
 

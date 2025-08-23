@@ -1,6 +1,6 @@
 # YouTube Metadata Generator
 
-A simple web app to extract YouTube captions and generate SEO-optimized titles and descriptions using Groq AI.
+A simple web app to extract YouTube captions and generate SEO-optimized titles and descriptions using OpenAI (gpt-4o-mini).
 
 **Created by:** [Patrick Passos](https://github.com/patrickpassosb)  
 **Contact:** patrickpassosb@gmail.com
@@ -8,7 +8,7 @@ A simple web app to extract YouTube captions and generate SEO-optimized titles a
 ## Features
 
 - 🎥 Extract English auto-captions from YouTube videos
-- 🤖 Generate catchy titles and SEO descriptions using Groq AI
+- 🤖 Generate catchy titles and SEO descriptions using OpenAI
 - 🌐 User-friendly Streamlit web interface
 - 💾 Download results as Markdown
 
@@ -18,10 +18,10 @@ A simple web app to extract YouTube captions and generate SEO-optimized titles a
 ```bash
    pip install -r requirements.txt
    ```
-2. **Get a Groq API key:** [console.groq.com](https://console.groq.com)
+2. **Get an OpenAI API key:** [OpenAI Platform](https://platform.openai.com/)
 3. **Set your API key as an environment variable:**
 ```bash
-export GROQ_API_KEY="your_api_key_here"
+export OPENAI_API_KEY="your_api_key_here"
 ```
 4. **Run the app:**
 ```bash
@@ -32,7 +32,7 @@ export GROQ_API_KEY="your_api_key_here"
 ## Requirements
 
 - Python 3.11+
-- Groq API key
+- OpenAI API key
 - English auto-captions enabled on YouTube videos
 
 ## File Structure
